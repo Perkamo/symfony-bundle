@@ -1,0 +1,84 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Perkamo\SymfonyBundle\Tests\Browser;
+
+use Perkamo\SymfonyBundle\Browser\BrowserSdkConfigProvider;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+final class BrowserSdkConfigProviderTest extends TestCase
+{
+    public function testReturnsBrowserSafeConfig(): void
+    {
+        $provider = new BrowserSdkConfigProvider(
+            $this->router(),
+            'https://api.perkamo.com/',
+            'commerce-test',
+            '0.1.2',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.1.2/dist/perkamo-browser.global.min.js',
+        );
+
+        self::assertSame([
+            'baseUrl' => 'https://api.perkamo.com',
+            'space' => 'commerce-test',
+            'browserBundleVersion' => '0.1.2',
+            'browserBundlePath' => 'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.1.2/dist/perkamo-browser.global.min.js',
+            'tokenEndpoint' => '/api/perkamo/token',
+            'streamTokenEndpoint' => '/api/perkamo/stream-token',
+        ], $provider->config());
+    }
+
+    public function testCreatesBrowserSdkScriptWithoutSecrets(): void
+    {
+        $provider = new BrowserSdkConfigProvider(
+            $this->router(),
+            'https://api.perkamo.com',
+            'commerce-test',
+            '0.1.2',
+            'https://cdn.example.test/perkamo-browser.js',
+        );
+
+        $script = $provider->scriptTag();
+
+        self::assertStringContainsString('https://cdn.example.test/perkamo-browser.js', $script);
+        self::assertStringContainsString('window.PerkamoSymfony.createClient', $script);
+        self::assertStringContainsString('/api/perkamo/token', $script);
+        self::assertStringContainsString('"browserBundleVersion":"0.1.2"', $script);
+        self::assertStringContainsString('"browserBundlePath":"https://cdn.example.test/perkamo-browser.js"', $script);
+        self::assertStringNotContainsString('PERKAMO_SECRET_KEY', $script);
+        self::assertStringNotContainsString('token_signing_key', $script);
+    }
+
+    public function testCreatesBrowserSdkScriptWithCustomBundlePath(): void
+    {
+        $provider = new BrowserSdkConfigProvider(
+            $this->router(),
+            'https://api.perkamo.com',
+            'commerce-test',
+            '0.1.2',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.1.2/dist/perkamo-browser.global.min.js',
+        );
+
+        $script = $provider->scriptTag('/build/perkamo-browser.global.min.js');
+
+        self::assertStringContainsString('src="/build/perkamo-browser.global.min.js"', $script);
+        self::assertStringContainsString('"browserBundlePath":"/build/perkamo-browser.global.min.js"', $script);
+        self::assertStringNotContainsString('@latest', $script);
+    }
+
+    private function router(): UrlGeneratorInterface
+    {
+        $router = $this->createMock(UrlGeneratorInterface::class);
+        $router
+            ->method('generate')
+            ->willReturnCallback(static fn (string $name): string => match ($name) {
+                'perkamo_browser_token' => '/api/perkamo/token',
+                'perkamo_browser_stream_token' => '/api/perkamo/stream-token',
+                default => throw new \RuntimeException('Unexpected route ' . $name),
+            });
+
+        return $router;
+    }
+}
