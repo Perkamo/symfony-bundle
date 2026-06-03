@@ -12,6 +12,7 @@ use Perkamo\SymfonyBundle\Controller\BrowserTokenController;
 use Perkamo\SymfonyBundle\Security\SecurityTokenUserIdResolver;
 use Perkamo\SymfonyBundle\Security\UserIdResolverInterface;
 use Perkamo\SymfonyBundle\Twig\PerkamoTwigExtension;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -33,7 +34,7 @@ final class PerkamoSymfonyExtension extends Extension
     {
         /** @var array{
          *     base_url: string,
-         *     space: string,
+         *     space: string|null,
          *     api_key: string,
          *     timeout_seconds: int,
          *     browser: array{
@@ -61,7 +62,6 @@ final class PerkamoSymfonyExtension extends Extension
             ->register(Client::class, Client::class)
             ->setArguments([
                 $config['base_url'],
-                $config['space'],
                 $config['api_key'],
                 $config['timeout_seconds'],
             ]);
@@ -72,6 +72,7 @@ final class PerkamoSymfonyExtension extends Extension
         }
 
         $browser = $config['browser'];
+        $space = $this->browserSpace($config['space']);
         $audience = $browser['token_audience'] ?? rtrim($config['base_url'], '/') . '/v1/client';
         $bundle = $browser['bundle'];
         $browserBundlePath = $bundle['path'] ?? sprintf(
@@ -94,7 +95,7 @@ final class PerkamoSymfonyExtension extends Extension
                 $browser['token_signing_key'],
                 $browser['token_issuer'],
                 $audience,
-                $config['space'],
+                $space,
                 $browser['token_ttl_seconds'],
                 $browser['stream_token_ttl_seconds'],
             ]);
@@ -104,7 +105,6 @@ final class PerkamoSymfonyExtension extends Extension
             ->setArguments([
                 new Reference(UrlGeneratorInterface::class),
                 $config['base_url'],
-                $config['space'],
                 $bundle['version'],
                 $browserBundlePath,
             ]);
@@ -129,5 +129,16 @@ final class PerkamoSymfonyExtension extends Extension
             ->register(PerkamoTwigExtension::class, PerkamoTwigExtension::class)
             ->setArgument('$configProvider', new Reference(BrowserSdkConfigProvider::class))
             ->addTag('twig.extension');
+    }
+
+    private function browserSpace(?string $space): string
+    {
+        if ($space !== null && trim($space) !== '') {
+            return $space;
+        }
+
+        throw new InvalidConfigurationException(
+            'The "perkamo.space" option is required when "perkamo.browser.enabled" is true.',
+        );
     }
 }

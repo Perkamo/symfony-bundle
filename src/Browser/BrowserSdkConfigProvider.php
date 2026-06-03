@@ -12,7 +12,6 @@ final class BrowserSdkConfigProvider
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly string $baseUrl,
-        private readonly string $space,
         private readonly string $browserBundleVersion,
         private readonly string $browserBundlePath,
     ) {
@@ -21,7 +20,6 @@ final class BrowserSdkConfigProvider
     /**
      * @return array{
      *     baseUrl: string,
-     *     space: string,
      *     browserBundleVersion: string,
      *     browserBundlePath: string,
      *     tokenEndpoint: string,
@@ -32,7 +30,6 @@ final class BrowserSdkConfigProvider
     {
         return [
             'baseUrl' => rtrim($this->baseUrl, '/'),
-            'space' => $this->space,
             'browserBundleVersion' => $this->browserBundleVersion,
             'browserBundlePath' => $browserBundlePath ?? $this->browserBundlePath,
             'tokenEndpoint' => $this->urlGenerator->generate('perkamo_browser_token'),
@@ -65,7 +62,6 @@ final class BrowserSdkConfigProvider
     }
     var options = Object.assign({
       baseUrl: config.baseUrl,
-      space: config.space,
       getToken: function () {
         return fetch(config.tokenEndpoint, { method: "POST", credentials: "include" })
           .then(function (response) {

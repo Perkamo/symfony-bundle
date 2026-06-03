@@ -1,5 +1,14 @@
 # `perkamo/symfony-bundle` Changelog
 
+## 0.3.0 - 2026-06-03
+
+### Changed
+
+- Require `perkamo/sdk` 0.3 and wire backend clients without a redundant Space argument.
+- Require `perkamo.space` only when browser token endpoints are enabled, and stop exposing the Space slug in frontend browser SDK config.
+- Added Symfony 8 compatibility while keeping Symfony 6.4 LTS and Symfony 7 support.
+- Aligned the default browser bundle version with `@perkamo/browser` 0.3.0.
+
 ## 0.2.0 - 2026-06-03
 
 ### Changed

@@ -2,11 +2,11 @@
 
 Symfony bundle for Perkamo backend and browser SDK integrations.
 
-The bundle supports Symfony 6.4 LTS and Symfony 7 on PHP 8.2+. It wires the
-server-side [`perkamo/sdk`](https://packagist.org/packages/perkamo/sdk) client
-into the Symfony container, exposes browser-token endpoints for
-`@perkamo/browser`, and provides Twig helpers for loading the browser SDK from
-the approved CDN build.
+The bundle supports Symfony 6.4 LTS, Symfony 7 and Symfony 8. Symfony 8 support
+requires PHP 8.4+. It wires the server-side
+[`perkamo/sdk`](https://packagist.org/packages/perkamo/sdk) client into the
+Symfony container, exposes browser-token endpoints for `@perkamo/browser`, and
+provides Twig helpers for loading the browser SDK from the approved CDN build.
 
 ```bash
 composer require perkamo/symfony-bundle
@@ -42,7 +42,7 @@ perkamo:
   timeout_seconds: 10
   browser:
     bundle:
-      version: "0.2.0"
+      version: "0.3.0"
     token_key_id: "%env(PERKAMO_BROWSER_TOKEN_KEY_ID)%"
     token_signing_key: "%env(PERKAMO_BROWSER_TOKEN_SIGNING_KEY)%"
     token_issuer: "%env(PERKAMO_BROWSER_TOKEN_ISSUER)%"
@@ -51,6 +51,11 @@ perkamo:
       - product.viewed
       - cart.updated
 ```
+
+`perkamo.space` is required only when the browser integration is enabled,
+because the server-side token factory embeds it into short-lived browser
+tokens. Backend event calls use the configured server API key to identify the
+Space.
 
 The bundle registers `Perkamo\Client`, so backend services can use constructor
 injection:
@@ -119,13 +124,13 @@ browser client without handling token routes manually:
 ```
 
 The generated frontend config never includes the server API key or browser
-token signing key.
+token signing key. It also does not expose the Space slug to frontend code.
 
 By default, the Twig helper loads the exact configured browser package version:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.2.0/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.3.0/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```
@@ -137,7 +142,7 @@ a self-hosted bundle globally, configure a custom path:
 perkamo:
   browser:
     bundle:
-      version: "0.2.0"
+      version: "0.3.0"
       path: "/build/perkamo-browser.global.min.js"
 ```
 
