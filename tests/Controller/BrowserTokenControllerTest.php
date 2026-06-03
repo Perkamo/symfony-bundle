@@ -30,6 +30,7 @@ final class BrowserTokenControllerTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('Bearer', $body['token_type']);
         self::assertSame('customer_123', $payload['sub']);
+        self::assertArrayNotHasKey('space', $payload);
         self::assertSame(['profile:read', 'events:write'], $payload['scope']);
         self::assertSame(['page.viewed'], $payload['events']);
     }
@@ -74,7 +75,6 @@ final class BrowserTokenControllerTest extends TestCase
             signingKey: 'browser-signing-secret',
             issuer: 'https://app.example.test',
             audience: 'https://api.perkamo.com/v1/client',
-            space: 'commerce-test',
         );
     }
 

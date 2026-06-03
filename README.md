@@ -37,12 +37,11 @@ perkamo:
 # config/packages/perkamo.yaml
 perkamo:
   base_url: "https://api.perkamo.com"
-  space: "%env(PERKAMO_SPACE)%"
   api_key: "%env(PERKAMO_SECRET_KEY)%"
   timeout_seconds: 10
   browser:
     bundle:
-      version: "0.3.1"
+      version: "0.4.0"
     token_key_id: "%env(PERKAMO_BROWSER_TOKEN_KEY_ID)%"
     token_signing_key: "%env(PERKAMO_BROWSER_TOKEN_SIGNING_KEY)%"
     token_issuer: "%env(PERKAMO_BROWSER_TOKEN_ISSUER)%"
@@ -52,10 +51,9 @@ perkamo:
       - cart.updated
 ```
 
-`perkamo.space` is required only when the browser integration is enabled,
-because the server-side token factory embeds it into short-lived browser
-tokens. Backend event calls use the configured server API key to identify the
-Space.
+Backend event calls use the configured server API key to identify the Space.
+Browser tokens use `token_key_id`; Perkamo resolves that Space-scoped browser
+key during token verification.
 
 The bundle registers `Perkamo\Client`, so backend services can use constructor
 injection:
@@ -130,7 +128,7 @@ By default, the Twig helper loads the exact configured browser package version:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.3.1/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.4.0/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```
@@ -142,7 +140,7 @@ a self-hosted bundle globally, configure a custom path:
 perkamo:
   browser:
     bundle:
-      version: "0.3.1"
+      version: "0.4.0"
       path: "/build/perkamo-browser.global.min.js"
 ```
 
@@ -161,6 +159,5 @@ Use this package only from trusted Symfony backend code. The browser token
 signing key is a backend secret and must not be exposed to templates, JSON
 config endpoints, browser bundles, mobile apps or embedded widgets.
 
-Browser tokens are HS256 JWTs with `typ=perkamo.client+jwt`, short lifetimes,
-the configured browser key id in `kid`, and scoped claims for
-`@perkamo/browser`.
+Browser tokens are HS256 JWTs with `typ=perkamo.client+jwt`, short lifetimes and
+the configured Space-scoped browser key id in `kid`.

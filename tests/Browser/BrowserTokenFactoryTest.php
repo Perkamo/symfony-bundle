@@ -17,7 +17,6 @@ final class BrowserTokenFactoryTest extends TestCase
             signingKey: 'browser-signing-secret',
             issuer: 'https://app.example.test',
             audience: 'https://api.perkamo.com/v1/client',
-            space: 'commerce-test',
             defaultTtlSeconds: 600,
             streamTtlSeconds: 120,
         );
@@ -39,7 +38,7 @@ final class BrowserTokenFactoryTest extends TestCase
         self::assertSame('https://app.example.test', $payload['iss']);
         self::assertSame('https://api.perkamo.com/v1/client', $payload['aud']);
         self::assertSame('customer_123', $payload['sub']);
-        self::assertSame('commerce-test', $payload['space']);
+        self::assertArrayNotHasKey('space', $payload);
         self::assertSame(['profile:read', 'events:write'], $payload['scope']);
         self::assertSame(['page.viewed', 'product.viewed'], $payload['events']);
         self::assertSame(1780229100, $payload['iat']);
@@ -56,7 +55,6 @@ final class BrowserTokenFactoryTest extends TestCase
             signingKey: 'browser-signing-secret',
             issuer: 'https://app.example.test',
             audience: 'https://api.perkamo.com/v1/client',
-            space: 'commerce-test',
             defaultTtlSeconds: 600,
             streamTtlSeconds: 90,
         );

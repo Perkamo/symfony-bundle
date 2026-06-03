@@ -1,5 +1,12 @@
 # `perkamo/symfony-bundle` Changelog
 
+## 0.4.0 - 2026-06-03
+
+### Changed
+
+- Remove `perkamo.space` from bundle configuration and browser token payloads; browser tokens are scoped by their configured browser key id.
+- Align the default browser bundle version with `@perkamo/browser` 0.4.0.
+
 ## 0.3.1 - 2026-06-03
 
 ### Changed

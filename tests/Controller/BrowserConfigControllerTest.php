@@ -25,7 +25,7 @@ final class BrowserConfigControllerTest extends TestCase
         $controller = new BrowserConfigController(new BrowserSdkConfigProvider(
             $router,
             'https://api.perkamo.com',
-            '0.3.1',
+            '0.4.0',
             'https://cdn.example.test/perkamo-browser.js',
         ));
 
@@ -34,7 +34,7 @@ final class BrowserConfigControllerTest extends TestCase
 
         self::assertSame(200, $response->getStatusCode());
         self::assertArrayNotHasKey('space', $body);
-        self::assertSame('0.3.1', $body['browserBundleVersion']);
+        self::assertSame('0.4.0', $body['browserBundleVersion']);
         self::assertSame('https://cdn.example.test/perkamo-browser.js', $body['browserBundlePath']);
         self::assertSame('/api/perkamo/token', $body['tokenEndpoint']);
         self::assertArrayNotHasKey('apiKey', $body);

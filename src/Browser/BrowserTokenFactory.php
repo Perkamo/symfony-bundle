@@ -16,7 +16,6 @@ final class BrowserTokenFactory
         private readonly string $signingKey,
         private readonly string $issuer,
         private readonly string $audience,
-        private readonly string $space,
         private readonly int $defaultTtlSeconds = 600,
         private readonly int $streamTtlSeconds = 120,
     ) {
@@ -24,7 +23,6 @@ final class BrowserTokenFactory
         $this->assertNonEmpty($this->signingKey, 'browser token signing key');
         $this->assertNonEmpty($this->issuer, 'browser token issuer');
         $this->assertNonEmpty($this->audience, 'browser token audience');
-        $this->assertNonEmpty($this->space, 'Perkamo space');
         $this->assertTtl($this->defaultTtlSeconds);
         $this->assertTtl($this->streamTtlSeconds);
     }
@@ -54,7 +52,6 @@ final class BrowserTokenFactory
             'iss' => $this->issuer,
             'aud' => $this->audience,
             'sub' => $subject,
-            'space' => $this->space,
             'scope' => $this->cleanStringList($scopes, 'browser token scope'),
             'iat' => $issuedAt,
             'nbf' => $issuedAt,

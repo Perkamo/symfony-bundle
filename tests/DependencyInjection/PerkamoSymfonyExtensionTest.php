@@ -12,7 +12,6 @@ use Perkamo\SymfonyBundle\DependencyInjection\PerkamoSymfonyExtension;
 use Perkamo\SymfonyBundle\Security\SecurityTokenUserIdResolver;
 use Perkamo\SymfonyBundle\Security\UserIdResolverInterface;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class PerkamoSymfonyExtensionTest extends TestCase
@@ -35,12 +34,14 @@ final class PerkamoSymfonyExtensionTest extends TestCase
         $factoryDefinition = $container->getDefinition(BrowserTokenFactory::class);
         self::assertSame('pk_test_123', $factoryDefinition->getArgument(0));
         self::assertSame('https://api.example.test/v1/client', $factoryDefinition->getArgument(3));
+        self::assertSame(600, $factoryDefinition->getArgument(4));
+        self::assertSame(120, $factoryDefinition->getArgument(5));
 
         self::assertTrue($container->hasDefinition(BrowserSdkConfigProvider::class));
         $configDefinition = $container->getDefinition(BrowserSdkConfigProvider::class);
-        self::assertSame('0.3.1', $configDefinition->getArgument(2));
+        self::assertSame('0.4.0', $configDefinition->getArgument(2));
         self::assertSame(
-            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.3.1/dist/perkamo-browser.global.min.js',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.4.0/dist/perkamo-browser.global.min.js',
             $configDefinition->getArgument(3),
         );
         self::assertSame(
@@ -58,7 +59,6 @@ final class PerkamoSymfonyExtensionTest extends TestCase
     {
         $container = new ContainerBuilder();
         $config = $this->config();
-        unset($config['space']);
         $config['browser']['enabled'] = false;
 
         (new PerkamoSymfonyExtension())->load([$config], $container);
@@ -67,16 +67,14 @@ final class PerkamoSymfonyExtensionTest extends TestCase
         self::assertFalse($container->hasDefinition(BrowserTokenFactory::class));
     }
 
-    public function testRequiresSpaceWhenBrowserIntegrationIsEnabled(): void
+    public function testBrowserIntegrationDoesNotRequireSpace(): void
     {
         $container = new ContainerBuilder();
         $config = $this->config();
-        unset($config['space']);
-
-        $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage('perkamo.space');
 
         (new PerkamoSymfonyExtension())->load([$config], $container);
+
+        self::assertTrue($container->hasDefinition(BrowserTokenFactory::class));
     }
 
     public function testCanUseCustomBrowserBundlePath(): void
@@ -98,12 +96,11 @@ final class PerkamoSymfonyExtensionTest extends TestCase
     {
         return [
             'base_url' => 'https://api.example.test',
-            'space' => 'commerce-test',
             'api_key' => 'sk_test_secret',
             'timeout_seconds' => 5,
             'browser' => [
                 'bundle' => [
-                    'version' => '0.3.1',
+                    'version' => '0.4.0',
                 ],
                 'token_key_id' => 'pk_test_123',
                 'token_signing_key' => 'browser-signing-secret',
