@@ -42,7 +42,7 @@ perkamo:
   timeout_seconds: 10
   browser:
     bundle:
-      version: "0.1.2"
+      version: "0.2.0"
     token_key_id: "%env(PERKAMO_BROWSER_TOKEN_KEY_ID)%"
     token_signing_key: "%env(PERKAMO_BROWSER_TOKEN_SIGNING_KEY)%"
     token_issuer: "%env(PERKAMO_BROWSER_TOKEN_ISSUER)%"
@@ -125,7 +125,7 @@ By default, the Twig helper loads the exact configured browser package version:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.1.2/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.2.0/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```
@@ -137,7 +137,7 @@ a self-hosted bundle globally, configure a custom path:
 perkamo:
   browser:
     bundle:
-      version: "0.1.2"
+      version: "0.2.0"
       path: "/build/perkamo-browser.global.min.js"
 ```
 

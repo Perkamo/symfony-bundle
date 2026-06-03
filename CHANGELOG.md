@@ -1,5 +1,12 @@
 # `perkamo/symfony-bundle` Changelog
 
+## 0.2.0 - 2026-06-03
+
+### Changed
+
+- Require `perkamo/sdk` 0.2 and align the default browser bundle version with `@perkamo/browser` 0.2.0.
+- Keep Symfony configuration, token payloads and browser SDK config on the `space` terminology.
+
 ## 0.1.0 - 2026-06-03
 
 ### Added

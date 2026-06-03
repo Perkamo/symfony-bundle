@@ -44,7 +44,7 @@ final class PerkamoTwigExtensionTest extends TestCase
             $router,
             'https://api.perkamo.com',
             'commerce-test',
-            '0.1.2',
+            '0.2.0',
             'https://cdn.example.test/perkamo-browser.js',
         );
     }
