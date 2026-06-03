@@ -38,9 +38,9 @@ final class PerkamoSymfonyExtensionTest extends TestCase
 
         self::assertTrue($container->hasDefinition(BrowserSdkConfigProvider::class));
         $configDefinition = $container->getDefinition(BrowserSdkConfigProvider::class);
-        self::assertSame('0.3.0', $configDefinition->getArgument(2));
+        self::assertSame('0.3.1', $configDefinition->getArgument(2));
         self::assertSame(
-            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.3.0/dist/perkamo-browser.global.min.js',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.3.1/dist/perkamo-browser.global.min.js',
             $configDefinition->getArgument(3),
         );
         self::assertSame(
@@ -103,7 +103,7 @@ final class PerkamoSymfonyExtensionTest extends TestCase
             'timeout_seconds' => 5,
             'browser' => [
                 'bundle' => [
-                    'version' => '0.3.0',
+                    'version' => '0.3.1',
                 ],
                 'token_key_id' => 'pk_test_123',
                 'token_signing_key' => 'browser-signing-secret',

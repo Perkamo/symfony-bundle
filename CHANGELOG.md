@@ -1,5 +1,11 @@
 # `perkamo/symfony-bundle` Changelog
 
+## 0.3.1 - 2026-06-03
+
+### Changed
+
+- Pin the default browser bundle version and documentation examples to `@perkamo/browser` 0.3.1.
+
 ## 0.3.0 - 2026-06-03
 
 ### Changed

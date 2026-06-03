@@ -46,7 +46,7 @@ final class Configuration implements ConfigurationInterface
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('version')
-                                    ->defaultValue('0.3.0')
+                                    ->defaultValue('0.3.1')
                                     ->cannotBeEmpty()
                                     ->validate()
                                         ->ifTrue(static fn (mixed $value): bool => !is_string($value) || preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/', $value) !== 1)
