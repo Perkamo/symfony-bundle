@@ -9,6 +9,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class BrowserSdkConfigProvider
 {
+    private const DEFAULT_BASE_URL = 'https://api.perkamo.com';
+
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly string $baseUrl,
@@ -19,7 +21,7 @@ final class BrowserSdkConfigProvider
 
     /**
      * @return array{
-     *     baseUrl: string,
+     *     baseUrl?: string,
      *     browserBundleVersion: string,
      *     browserBundlePath: string,
      *     tokenEndpoint: string,
@@ -28,8 +30,10 @@ final class BrowserSdkConfigProvider
      */
     public function config(?string $browserBundlePath = null): array
     {
+        $baseUrl = rtrim($this->baseUrl, '/');
+
         return [
-            'baseUrl' => rtrim($this->baseUrl, '/'),
+            ...($baseUrl === self::DEFAULT_BASE_URL ? [] : ['baseUrl' => $baseUrl]),
             'browserBundleVersion' => $this->browserBundleVersion,
             'browserBundlePath' => $browserBundlePath ?? $this->browserBundlePath,
             'tokenEndpoint' => $this->urlGenerator->generate('perkamo_browser_token'),
@@ -60,8 +64,7 @@ final class BrowserSdkConfigProvider
     if (!window.PerkamoBrowser || !window.PerkamoBrowser.createPerkamoBrowserClient) {
       throw new Error("Perkamo browser SDK has not loaded yet.");
     }
-    var options = Object.assign({
-      baseUrl: config.baseUrl,
+    var defaults = {
       getToken: function () {
         return fetch(config.tokenEndpoint, { method: "POST", credentials: "include" })
           .then(function (response) {
@@ -78,7 +81,11 @@ final class BrowserSdkConfigProvider
           })
           .then(function (body) { return body.token; });
       }
-    }, overrides || {});
+    };
+    if (config.baseUrl) {
+      defaults.baseUrl = config.baseUrl;
+    }
+    var options = Object.assign(defaults, overrides || {});
     return window.PerkamoBrowser.createPerkamoBrowserClient(options);
   };
 })();

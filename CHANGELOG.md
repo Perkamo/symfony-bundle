@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.5.1 - 2026-06-04
+
+### Changed
+
+- Default Symfony integrations and generated browser clients to the hosted
+  Perkamo API, exposing `base_url` only as a custom endpoint override.
+- Align the default browser bundle version with `@perkamo/browser` 0.4.1.
+
 ## 0.5.0 - 2026-06-04
 
 ### Changed

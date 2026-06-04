@@ -56,23 +56,25 @@ loader explicit.
 ```yaml
 # config/packages/perkamo.yaml
 perkamo:
-  base_url: "https://api.perkamo.com"
   api_key: "%env(PERKAMO_SECRET_KEY)%"
   timeout_seconds: 10
   browser:
     key: "%env(PERKAMO_BROWSER_KEY)%"
     bundle:
-      version: "0.4.0"
+      version: "0.4.1"
 ```
 
 Backend event calls use the configured server API key to identify the Space.
+The bundle defaults to the hosted Perkamo API. Configure `base_url` only for a
+custom, staging or private endpoint.
 Browser token routes use `browser.key`, the public browser key from the Perkamo
 console. The bundle calls Perkamo with the configured server API key and Perkamo
 returns the short-lived browser JWT. No browser token signing secret is stored
-in your Symfony app. Browser token scopes and allowed client events are
-configured on the browser key in Perkamo. Use `*` on the browser key to allow
-all current and future configured events. New browser keys default to the full
-browser SDK policy: profile reads, allowed browser events and profile streams.
+in your Symfony app. Browser key access policy is configured in Perkamo and
+enforced server-side. The bundle does not send scopes or event allowlists in
+token requests. Use `*` on the browser key to allow all current and future
+configured events. New browser keys default to the full browser SDK policy:
+profile reads, allowed browser events and profile streams.
 
 The bundle registers `Perkamo\Client`, so backend services can use constructor
 injection:
@@ -128,8 +130,10 @@ In a Twig layout:
 ```
 
 The helper loads the browser bundle from jsDelivr by default and defines
-`window.PerkamoSymfony.createClient()`. Frontend code can then create the
-browser client without handling token routes manually:
+`window.PerkamoSymfony.createClient()`. The generated config includes browser
+bundle metadata, local token endpoints and a custom API endpoint only when
+`base_url` is configured. Frontend code can then create the preview browser
+client without handling token routes manually:
 
 ```html
 <script>
@@ -143,11 +147,16 @@ browser client without handling token routes manually:
 The generated frontend config never includes the server API key or browser key.
 It also does not expose the Space ID to frontend code.
 
+The generated client uses preview Perkamo `/v1/client/*` routes after it receives
+a browser token. Until those routes are enabled for an integration, use the
+bundle for backend event emission and token issuing, and return profile state
+through your own backend controllers.
+
 By default, the Twig helper loads the exact configured browser package version:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.4.0/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.4.1/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```
@@ -159,7 +168,7 @@ a self-hosted bundle globally, configure a custom path:
 perkamo:
   browser:
     bundle:
-      version: "0.4.0"
+      version: "0.4.1"
       path: "/build/perkamo-browser.global.min.js"
 ```
 
@@ -179,9 +188,8 @@ routes require an authenticated Symfony user before they ask Perkamo to issue a
 short-lived browser JWT. Never expose the server API key to templates, JSON
 config endpoints, browser bundles, mobile apps or embedded widgets.
 
-Browser tokens are HS256 JWTs with `typ=perkamo.client+jwt`, short lifetimes and
-the configured browser key in `kid`. They are issued by Perkamo, not locally
-signed by the Symfony application.
+Browser tokens are short-lived credentials issued by Perkamo, not locally signed
+by the Symfony application.
 
 ## License
 
