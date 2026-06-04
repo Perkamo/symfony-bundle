@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.0 - 2026-06-04
+
+### Changed
+
+- Require `perkamo/sdk` 0.5 so Symfony services can use program catalog helpers
+  and enriched API error metadata.
+- Align the default browser bundle version with `@perkamo/browser` 0.5.0.
+
 ## 0.5.1 - 2026-06-04
 
 ### Changed

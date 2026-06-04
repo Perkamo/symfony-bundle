@@ -17,7 +17,7 @@
     "php": ">=8.2",
     "ext-hash": "*",
     "ext-json": "*",
-    "perkamo/sdk": "^0.4",
+    "perkamo/sdk": "^0.5",
     "symfony/config": "^6.4 || ^7.4 || ^8.0",
     "symfony/dependency-injection": "^6.4 || ^7.4 || ^8.0",
     "symfony/http-foundation": "^6.4 || ^7.4 || ^8.0",
