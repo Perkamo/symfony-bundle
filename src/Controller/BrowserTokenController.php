@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Perkamo\SymfonyBundle\Controller;
 
 use Perkamo\SymfonyBundle\Browser\BrowserToken;
-use Perkamo\SymfonyBundle\Browser\BrowserTokenFactory;
+use Perkamo\SymfonyBundle\Browser\BrowserTokenIssuerInterface;
 use Perkamo\SymfonyBundle\Security\UserIdResolverInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,27 +13,17 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 final class BrowserTokenController
 {
-    /**
-     * @param list<string> $scopes
-     * @param list<string> $streamScopes
-     * @param list<string> $eventAllowlist
-     */
     public function __construct(
-        private readonly BrowserTokenFactory $tokenFactory,
+        private readonly BrowserTokenIssuerInterface $tokenIssuer,
         private readonly UserIdResolverInterface $userIdResolver,
-        private readonly array $scopes,
-        private readonly array $streamScopes,
-        private readonly array $eventAllowlist,
     ) {
     }
 
     public function token(Request $request): JsonResponse
     {
         return $this->response(
-            $this->tokenFactory->create(
+            $this->tokenIssuer->create(
                 $this->requireUserId($request),
-                $this->scopes,
-                $this->eventAllowlist,
             ),
         );
     }
@@ -41,9 +31,8 @@ final class BrowserTokenController
     public function streamToken(Request $request): JsonResponse
     {
         return $this->response(
-            $this->tokenFactory->createStreamToken(
+            $this->tokenIssuer->createStreamToken(
                 $this->requireUserId($request),
-                $this->streamScopes,
             ),
         );
     }

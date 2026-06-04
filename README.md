@@ -1,21 +1,34 @@
 # `perkamo/symfony-bundle`
 
-Symfony bundle for Perkamo backend and browser SDK integrations.
+Perkamo integration bundle for Symfony applications.
 
-The bundle supports Symfony 6.4 LTS, Symfony 7 and Symfony 8. Symfony 8 support
-requires PHP 8.4+. It wires the server-side
-[`perkamo/sdk`](https://packagist.org/packages/perkamo/sdk) client into the
-Symfony container, exposes browser-token endpoints for `@perkamo/browser`, and
-provides Twig helpers for loading the browser SDK from the approved CDN build.
+It provides:
+
+- a configured [`perkamo/sdk`](https://packagist.org/packages/perkamo/sdk)
+  backend client service,
+- authenticated browser-token and stream-token endpoints for `@perkamo/browser`,
+- Twig helpers that load either the pinned CDN browser bundle or a self-hosted
+  browser bundle path.
+
+## Compatibility
+
+- PHP 8.2+
+- Symfony 6.4 LTS
+- Symfony 7.4 LTS
+- Symfony 8.x, which requires PHP 8.4+ through Symfony
+
+Symfony 7.0 through 7.3 are intentionally not supported.
+
+## Install
 
 ```bash
 composer require perkamo/symfony-bundle
 ```
 
-## Register The Bundle
+## Register The Bundle And Routes
 
-Symfony Flex can register the bundle automatically. Without Flex, add it to
-`config/bundles.php`:
+Symfony Flex can enable the bundle from the package metadata. Without Flex, add
+it to `config/bundles.php`:
 
 ```php
 return [
@@ -23,13 +36,20 @@ return [
 ];
 ```
 
-Import the browser SDK routes:
+Symfony does not import third-party bundle routes automatically. Add one route
+import in your application:
 
 ```yaml
 # config/routes/perkamo.yaml
 perkamo:
   resource: "@PerkamoSymfonyBundle/config/routes.php"
+  type: php
 ```
+
+The bundle ships route definitions as PHP config so `symfony/yaml` is not a
+runtime dependency of this package. Importing the PHP route file from your
+application YAML route config is supported by Symfony; `type: php` makes the
+loader explicit.
 
 ## Configure
 
@@ -40,26 +60,26 @@ perkamo:
   api_key: "%env(PERKAMO_SECRET_KEY)%"
   timeout_seconds: 10
   browser:
+    key: "%env(PERKAMO_BROWSER_KEY)%"
     bundle:
       version: "0.4.0"
-    token_key_id: "%env(PERKAMO_BROWSER_TOKEN_KEY_ID)%"
-    token_signing_key: "%env(PERKAMO_BROWSER_TOKEN_SIGNING_KEY)%"
-    token_issuer: "%env(PERKAMO_BROWSER_TOKEN_ISSUER)%"
-    event_allowlist:
-      - page.viewed
-      - product.viewed
-      - cart.updated
 ```
 
 Backend event calls use the configured server API key to identify the Space.
-Browser tokens use `token_key_id`; Perkamo resolves that Space-scoped browser
-key during token verification.
+Browser token routes use `browser.key`, the public browser key from the Perkamo
+console. The bundle calls Perkamo with the configured server API key and Perkamo
+returns the short-lived browser JWT. No browser token signing secret is stored
+in your Symfony app. Browser token scopes and allowed client events are
+configured on the browser key in Perkamo. Use `*` on the browser key to allow
+all current and future configured events. New browser keys default to the full
+browser SDK policy: profile reads, allowed browser events and profile streams.
 
 The bundle registers `Perkamo\Client`, so backend services can use constructor
 injection:
 
 ```php
 use Perkamo\Client;
+use Perkamo\EventInput;
 
 final class CheckoutEvents
 {
@@ -69,12 +89,11 @@ final class CheckoutEvents
 
     public function completed(string $customerId, string $orderId): void
     {
-        $this->perkamo->emit(
-            userId: $customerId,
-            event: 'purchase.completed',
-            context: ['order_id' => $orderId],
-            transactionId: $orderId,
-        );
+        $event = EventInput::create($customerId, 'purchase.completed')
+            ->withTransactionId($orderId)
+            ->withContextValue('order_id', $orderId);
+
+        $this->perkamo->emitEvent($event);
     }
 }
 ```
@@ -121,8 +140,8 @@ browser client without handling token routes manually:
 </script>
 ```
 
-The generated frontend config never includes the server API key or browser
-token signing key. It also does not expose the Space slug to frontend code.
+The generated frontend config never includes the server API key or browser key.
+It also does not expose the Space ID to frontend code.
 
 By default, the Twig helper loads the exact configured browser package version:
 
@@ -156,8 +175,14 @@ but new integrations should use `perkamo_browser_bundle_script()`.
 ## Security Notes
 
 Use this package only from trusted Symfony backend code. The browser token
-signing key is a backend secret and must not be exposed to templates, JSON
+routes require an authenticated Symfony user before they ask Perkamo to issue a
+short-lived browser JWT. Never expose the server API key to templates, JSON
 config endpoints, browser bundles, mobile apps or embedded widgets.
 
 Browser tokens are HS256 JWTs with `typ=perkamo.client+jwt`, short lifetimes and
-the configured Space-scoped browser key id in `kid`.
+the configured browser key in `kid`. They are issued by Perkamo, not locally
+signed by the Symfony application.
+
+## License
+
+MIT

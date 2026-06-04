@@ -1,5 +1,17 @@
 # `perkamo/symfony-bundle` Changelog
 
+## Unreleased
+
+## 0.5.0 - 2026-06-04
+
+### Changed
+
+- Limit supported Symfony versions to 6.4 LTS, 7.4 LTS and 8.x.
+- Clarify route import guidance and compatibility documentation.
+- Replace local browser JWT signing with Perkamo-issued browser tokens requested
+  through `perkamo/sdk`; configure the public browser key with `browser.key`.
+- Switch the package license to MIT.
+
 ## 0.4.0 - 2026-06-03
 
 ### Changed
@@ -18,7 +30,7 @@
 ### Changed
 
 - Require `perkamo/sdk` 0.3 and wire backend clients without a redundant Space argument.
-- Require `perkamo.space` only when browser token endpoints are enabled, and stop exposing the Space slug in frontend browser SDK config.
+- Require `perkamo.space` only when browser token endpoints are enabled, and stop exposing the Space ID in frontend browser SDK config.
 - Added Symfony 8 compatibility while keeping Symfony 6.4 LTS and Symfony 7 support.
 - Aligned the default browser bundle version with `@perkamo/browser` 0.3.0.
 

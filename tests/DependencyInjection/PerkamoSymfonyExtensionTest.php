@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Perkamo\SymfonyBundle\Tests\DependencyInjection;
 
 use Perkamo\Client;
+use Perkamo\SymfonyBundle\Browser\ApiBrowserTokenIssuer;
 use Perkamo\SymfonyBundle\Browser\BrowserSdkConfigProvider;
-use Perkamo\SymfonyBundle\Browser\BrowserTokenFactory;
+use Perkamo\SymfonyBundle\Browser\BrowserTokenIssuerInterface;
 use Perkamo\SymfonyBundle\Controller\BrowserTokenController;
 use Perkamo\SymfonyBundle\DependencyInjection\PerkamoSymfonyExtension;
 use Perkamo\SymfonyBundle\Security\SecurityTokenUserIdResolver;
@@ -31,11 +32,14 @@ final class PerkamoSymfonyExtensionTest extends TestCase
         self::assertSame(5, $clientDefinition->getArgument(2));
         self::assertSame(Client::class, (string) $container->getAlias('perkamo.client'));
 
-        $factoryDefinition = $container->getDefinition(BrowserTokenFactory::class);
-        self::assertSame('pk_test_123', $factoryDefinition->getArgument(0));
-        self::assertSame('https://api.example.test/v1/client', $factoryDefinition->getArgument(3));
-        self::assertSame(600, $factoryDefinition->getArgument(4));
-        self::assertSame(120, $factoryDefinition->getArgument(5));
+        $issuerDefinition = $container->getDefinition(ApiBrowserTokenIssuer::class);
+        self::assertSame('pk_test_123', $issuerDefinition->getArgument(1));
+        self::assertSame(600, $issuerDefinition->getArgument(2));
+        self::assertSame(120, $issuerDefinition->getArgument(3));
+        self::assertSame(
+            ApiBrowserTokenIssuer::class,
+            (string) $container->getAlias(BrowserTokenIssuerInterface::class),
+        );
 
         self::assertTrue($container->hasDefinition(BrowserSdkConfigProvider::class));
         $configDefinition = $container->getDefinition(BrowserSdkConfigProvider::class);
@@ -50,9 +54,7 @@ final class PerkamoSymfonyExtensionTest extends TestCase
         );
 
         $controllerDefinition = $container->getDefinition(BrowserTokenController::class);
-        self::assertSame(['profile:read', 'events:write'], $controllerDefinition->getArgument(2));
-        self::assertSame(['stream:read'], $controllerDefinition->getArgument(3));
-        self::assertSame(['page.viewed'], $controllerDefinition->getArgument(4));
+        self::assertCount(2, $controllerDefinition->getArguments());
     }
 
     public function testCanDisableBrowserIntegration(): void
@@ -64,7 +66,7 @@ final class PerkamoSymfonyExtensionTest extends TestCase
         (new PerkamoSymfonyExtension())->load([$config], $container);
 
         self::assertTrue($container->hasDefinition(Client::class));
-        self::assertFalse($container->hasDefinition(BrowserTokenFactory::class));
+        self::assertFalse($container->hasDefinition(ApiBrowserTokenIssuer::class));
     }
 
     public function testBrowserIntegrationDoesNotRequireSpace(): void
@@ -74,7 +76,7 @@ final class PerkamoSymfonyExtensionTest extends TestCase
 
         (new PerkamoSymfonyExtension())->load([$config], $container);
 
-        self::assertTrue($container->hasDefinition(BrowserTokenFactory::class));
+        self::assertTrue($container->hasDefinition(ApiBrowserTokenIssuer::class));
     }
 
     public function testCanUseCustomBrowserBundlePath(): void
@@ -102,12 +104,9 @@ final class PerkamoSymfonyExtensionTest extends TestCase
                 'bundle' => [
                     'version' => '0.4.0',
                 ],
-                'token_key_id' => 'pk_test_123',
-                'token_signing_key' => 'browser-signing-secret',
-                'token_issuer' => 'https://app.example.test',
+                'key' => 'pk_test_123',
                 'token_ttl_seconds' => 600,
                 'stream_token_ttl_seconds' => 120,
-                'event_allowlist' => ['page.viewed'],
             ],
         ];
     }

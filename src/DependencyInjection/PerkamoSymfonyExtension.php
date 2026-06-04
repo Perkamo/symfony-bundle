@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Perkamo\SymfonyBundle\DependencyInjection;
 
 use Perkamo\Client;
+use Perkamo\SymfonyBundle\Browser\ApiBrowserTokenIssuer;
 use Perkamo\SymfonyBundle\Browser\BrowserSdkConfigProvider;
-use Perkamo\SymfonyBundle\Browser\BrowserTokenFactory;
+use Perkamo\SymfonyBundle\Browser\BrowserTokenIssuerInterface;
 use Perkamo\SymfonyBundle\Controller\BrowserConfigController;
 use Perkamo\SymfonyBundle\Controller\BrowserTokenController;
 use Perkamo\SymfonyBundle\Security\SecurityTokenUserIdResolver;
@@ -41,15 +42,9 @@ final class PerkamoSymfonyExtension extends Extension
          *             version: string,
          *             path: string|null
          *         },
-         *         token_key_id: string,
-         *         token_signing_key: string,
-         *         token_issuer: string,
-         *         token_audience: string|null,
+         *         key: string,
          *         token_ttl_seconds: int,
          *         stream_token_ttl_seconds: int,
-         *         scopes: list<string>,
-         *         stream_scopes: list<string>,
-         *         event_allowlist: list<string>,
          *         user_id_resolver: string
          *     }
          * } $config
@@ -70,7 +65,6 @@ final class PerkamoSymfonyExtension extends Extension
         }
 
         $browser = $config['browser'];
-        $audience = $browser['token_audience'] ?? rtrim($config['base_url'], '/') . '/v1/client';
         $bundle = $browser['bundle'];
         $browserBundlePath = $bundle['path'] ?? sprintf(
             'https://cdn.jsdelivr.net/npm/@perkamo/browser@%s/dist/perkamo-browser.global.min.js',
@@ -86,15 +80,14 @@ final class PerkamoSymfonyExtension extends Extension
         $container->setAlias(UserIdResolverInterface::class, $browser['user_id_resolver']);
 
         $container
-            ->register(BrowserTokenFactory::class, BrowserTokenFactory::class)
+            ->register(ApiBrowserTokenIssuer::class, ApiBrowserTokenIssuer::class)
             ->setArguments([
-                $browser['token_key_id'],
-                $browser['token_signing_key'],
-                $browser['token_issuer'],
-                $audience,
+                new Reference(Client::class),
+                $browser['key'],
                 $browser['token_ttl_seconds'],
                 $browser['stream_token_ttl_seconds'],
             ]);
+        $container->setAlias(BrowserTokenIssuerInterface::class, ApiBrowserTokenIssuer::class);
 
         $container
             ->register(BrowserSdkConfigProvider::class, BrowserSdkConfigProvider::class)
@@ -108,11 +101,8 @@ final class PerkamoSymfonyExtension extends Extension
         $container
             ->register(BrowserTokenController::class, BrowserTokenController::class)
             ->setArguments([
-                new Reference(BrowserTokenFactory::class),
+                new Reference(BrowserTokenIssuerInterface::class),
                 new Reference(UserIdResolverInterface::class),
-                $browser['scopes'],
-                $browser['stream_scopes'],
-                $browser['event_allowlist'],
             ])
             ->addTag('controller.service_arguments');
 
