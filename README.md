@@ -61,7 +61,7 @@ perkamo:
   browser:
     key: "%env(PERKAMO_BROWSER_KEY)%"
     bundle:
-      version: "0.5.0"
+      version: "0.6.0"
 ```
 
 Backend event calls use the configured server API key to identify the Space.
@@ -103,10 +103,16 @@ final class CheckoutEvents
 The same autowired `Perkamo\Client` can read trusted admin metadata:
 
 ```php
+$perkamo->identify($customerId, [
+    'email' => $customerEmail,
+    'name' => $customerName,
+]);
+
 $events = $perkamo->eventCatalog();
 ```
 
-Use this for backend admin screens that need configured event keys and labels.
+Use `identify()` for trusted profile traits and `eventCatalog()` for backend
+admin screens that need configured event keys and labels.
 Non-2xx API responses throw `Perkamo\Exception\PerkamoApiException`, including
 request id, retry-after and rate-limit metadata when available.
 
@@ -166,7 +172,7 @@ By default, the Twig helper loads the exact configured browser package version:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.5.0/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.6.0/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```
@@ -178,7 +184,7 @@ a self-hosted bundle globally, configure a custom path:
 perkamo:
   browser:
     bundle:
-      version: "0.5.0"
+      version: "0.6.0"
       path: "/build/perkamo-browser.global.min.js"
 ```
 

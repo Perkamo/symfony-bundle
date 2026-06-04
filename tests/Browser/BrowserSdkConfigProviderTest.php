@@ -15,13 +15,13 @@ final class BrowserSdkConfigProviderTest extends TestCase
         $provider = new BrowserSdkConfigProvider(
             $this->router(),
             'https://api.perkamo.com/',
-            '0.5.0',
-            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.5.0/dist/perkamo-browser.global.min.js',
+            '0.6.0',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.6.0/dist/perkamo-browser.global.min.js',
         );
 
         self::assertSame([
-            'browserBundleVersion' => '0.5.0',
-            'browserBundlePath' => 'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.5.0/dist/perkamo-browser.global.min.js',
+            'browserBundleVersion' => '0.6.0',
+            'browserBundlePath' => 'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.6.0/dist/perkamo-browser.global.min.js',
             'tokenEndpoint' => '/api/perkamo/token',
             'streamTokenEndpoint' => '/api/perkamo/stream-token',
         ], $provider->config());
@@ -32,7 +32,7 @@ final class BrowserSdkConfigProviderTest extends TestCase
         $provider = new BrowserSdkConfigProvider(
             $this->router(),
             'https://api.perkamo.com',
-            '0.5.0',
+            '0.6.0',
             'https://cdn.example.test/perkamo-browser.js',
         );
 
@@ -41,7 +41,7 @@ final class BrowserSdkConfigProviderTest extends TestCase
         self::assertStringContainsString('https://cdn.example.test/perkamo-browser.js', $script);
         self::assertStringContainsString('window.PerkamoSymfony.createClient', $script);
         self::assertStringContainsString('/api/perkamo/token', $script);
-        self::assertStringContainsString('"browserBundleVersion":"0.5.0"', $script);
+        self::assertStringContainsString('"browserBundleVersion":"0.6.0"', $script);
         self::assertStringContainsString('"browserBundlePath":"https://cdn.example.test/perkamo-browser.js"', $script);
         self::assertStringNotContainsString('"baseUrl"', $script);
         self::assertStringNotContainsString('"space"', $script);
@@ -54,8 +54,8 @@ final class BrowserSdkConfigProviderTest extends TestCase
         $provider = new BrowserSdkConfigProvider(
             $this->router(),
             'https://api.perkamo.com',
-            '0.5.0',
-            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.5.0/dist/perkamo-browser.global.min.js',
+            '0.6.0',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.6.0/dist/perkamo-browser.global.min.js',
         );
 
         $script = $provider->scriptTag('/build/perkamo-browser.global.min.js');
@@ -70,7 +70,7 @@ final class BrowserSdkConfigProviderTest extends TestCase
         $provider = new BrowserSdkConfigProvider(
             $this->router(),
             'https://api.example.test/',
-            '0.5.0',
+            '0.6.0',
             'https://cdn.example.test/perkamo-browser.js',
         );
 
