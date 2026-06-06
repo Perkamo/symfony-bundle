@@ -10,6 +10,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 final class Configuration implements ConfigurationInterface
 {
+    public const DEFAULT_BROWSER_BUNDLE_VERSION = '0.7.0';
+
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('perkamo');
@@ -39,7 +41,7 @@ final class Configuration implements ConfigurationInterface
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('version')
-                                    ->defaultValue('0.6.0')
+                                    ->defaultValue(self::DEFAULT_BROWSER_BUNDLE_VERSION)
                                     ->cannotBeEmpty()
                                     ->validate()
                                         ->ifTrue(static fn (mixed $value): bool => !is_string($value) || preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/', $value) !== 1)

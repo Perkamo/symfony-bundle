@@ -60,8 +60,6 @@ perkamo:
   timeout_seconds: 10
   browser:
     key: "%env(PERKAMO_BROWSER_KEY)%"
-    bundle:
-      version: "0.6.0"
 ```
 
 Backend event calls use the configured server API key to identify the Space.
@@ -74,7 +72,7 @@ in your Symfony app. Browser key access policy is configured in Perkamo and
 enforced server-side. The bundle does not send scopes or event allowlists in
 token requests. Use `*` on the browser key to allow all current and future
 configured events. New browser keys default to the full browser SDK policy:
-profile reads, allowed browser events and profile streams.
+customer reads, allowed browser events and customer streams.
 
 The bundle registers `Perkamo\Client`, so backend services can use constructor
 injection:
@@ -111,7 +109,7 @@ $perkamo->identify($customerId, [
 $events = $perkamo->eventCatalog();
 ```
 
-Use `identify()` for trusted profile traits and `eventCatalog()` for backend
+Use `identify()` for trusted customer traits and `eventCatalog()` for backend
 admin screens that need configured event keys and labels.
 Non-2xx API responses throw `Perkamo\Exception\PerkamoApiException`, including
 request id, retry-after and rate-limit metadata when available.
@@ -125,7 +123,7 @@ After importing the routes, the bundle exposes:
 - `POST /api/perkamo/stream-token`
 
 The token endpoints use the current Symfony security user identifier by
-default. For custom profile IDs, implement
+default. For custom customer IDs, implement
 `Perkamo\SymfonyBundle\Security\UserIdResolverInterface` and configure:
 
 ```yaml
@@ -165,26 +163,27 @@ It also does not expose the Space ID to frontend code.
 
 The generated client uses preview Perkamo `/v1/client/*` routes after it receives
 a browser token. Until those routes are enabled for an integration, use the
-bundle for backend event emission and token issuing, and return profile state
+bundle for backend event emission and token issuing, and return customer state
 through your own backend controllers.
 
-By default, the Twig helper loads the exact configured browser package version:
+By default, the Twig helper loads the exact browser package version bundled with
+this Symfony bundle:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.6.0/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.7.0/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```
 
-Set `perkamo.browser.bundle.version` when upgrading the browser package. To use
-a self-hosted bundle globally, configure a custom path:
+Override `perkamo.browser.bundle.version` only when intentionally using a
+different compatible browser package. To use a self-hosted bundle globally,
+configure a custom path:
 
 ```yaml
 perkamo:
   browser:
     bundle:
-      version: "0.6.0"
       path: "/build/perkamo-browser.global.min.js"
 ```
 

@@ -1,10 +1,18 @@
 # `perkamo/symfony-bundle` Changelog
 
+## 0.8.0 - 2026-06-06
+
+### Changed
+
+- Require `perkamo/sdk` 0.7 so Symfony services use the customer-first PHP SDK
+  release.
+- Align the default browser bundle version with `@perkamo/browser` 0.7.0.
+
 ## 0.7.0 - 2026-06-04
 
 ### Changed
 
-- Require `perkamo/sdk` 0.6 so Symfony services can use trusted profile
+- Require `perkamo/sdk` 0.6 so Symfony services can use trusted customer
   `identify()` helpers.
 - Align the default browser bundle version with `@perkamo/browser` 0.6.0.
 
