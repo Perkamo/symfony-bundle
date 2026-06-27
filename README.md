@@ -6,7 +6,7 @@ It provides:
 
 - a configured [`perkamo/sdk`](https://packagist.org/packages/perkamo/sdk)
   backend client service,
-- authenticated browser-token and stream-token endpoints for `@perkamo/browser`,
+- authenticated client-token and stream-token endpoints for `@perkamo/browser`,
 - Twig helpers that load either the pinned CDN browser bundle or a self-hosted
   browser bundle path.
 
@@ -25,7 +25,7 @@ Symfony 7.0 through 7.3 are intentionally not supported.
 composer require perkamo/symfony-bundle
 ```
 
-## Register The Bundle And Routes
+## Register The Bundle
 
 Symfony Flex can enable the bundle from the package metadata. Without Flex, add
 it to `config/bundles.php`:
@@ -36,21 +36,6 @@ return [
 ];
 ```
 
-Symfony does not import third-party bundle routes automatically. Add one route
-import in your application:
-
-```yaml
-# config/routes/perkamo.yaml
-perkamo:
-  resource: "@PerkamoSymfonyBundle/config/routes.php"
-  type: php
-```
-
-The bundle ships route definitions as PHP config so `symfony/yaml` is not a
-runtime dependency of this package. Importing the PHP route file from your
-application YAML route config is supported by Symfony; `type: php` makes the
-loader explicit.
-
 ## Configure
 
 ```yaml
@@ -58,21 +43,38 @@ loader explicit.
 perkamo:
   api_key: "%env(PERKAMO_SECRET_KEY)%"
   timeout_seconds: 10
-  browser:
-    key: "%env(PERKAMO_BROWSER_KEY)%"
 ```
 
 Backend event calls use the configured server API key to identify the Space.
 The bundle defaults to the hosted Perkamo API. Configure `base_url` only for a
 custom, staging or private endpoint.
-Browser token routes use `browser.key`, the public browser key from the Perkamo
-console. The bundle calls Perkamo with the configured server API key and Perkamo
-returns the short-lived browser JWT. No browser token signing secret is stored
-in your Symfony app. Browser key access policy is configured in Perkamo and
-enforced server-side. The bundle does not send scopes or event allowlists in
-token requests. Use `*` on the browser key to allow all current and future
-configured events. New browser keys default to the full browser SDK policy:
-customer reads, allowed browser events and customer streams.
+
+Browser token routes are optional. Create a signing key in the Perkamo console
+(Settings → Security → Signing keys). It gives you a **KID** (shown in the
+creation dialog and then listed in the table) and a **one-time secret** (shown
+once, backend-only).
+Enable `perkamo.browser` and wire both — the `%env(...)%` names are your own
+choice:
+
+```yaml
+# config/packages/perkamo.yaml
+perkamo:
+  api_key: "%env(PERKAMO_SECRET_KEY)%"
+  browser:
+    enabled: true
+    kid: "%env(PERKAMO_SIGNING_KID)%" # KID
+    secret: "%env(PERKAMO_SIGNING_SECRET)%" # backend-only
+```
+
+| Key      | What it is                                                                    |
+| -------- | ----------------------------------------------------------------------------- |
+| `kid`    | KID of your signing key; goes in the token header. Safe to expose.            |
+| `secret` | The signing key's one-time secret that signs the token. Keep it backend-only. |
+
+When enabled, the bundle verifies the Symfony user session and self-signs a
+short-lived client token for `@perkamo/browser`. The token scope and event list
+are clamped to the signing key policy by Perkamo during client route
+verification; only the secret is sensitive — the `kid` is public.
 
 The bundle registers `Perkamo\Client`, so backend services can use constructor
 injection:
@@ -122,6 +124,20 @@ After importing the routes, the bundle exposes:
 - `POST /api/perkamo/token`
 - `POST /api/perkamo/stream-token`
 
+Import the bundle routes only when you enable those browser endpoints:
+
+```yaml
+# config/routes/perkamo.yaml
+perkamo:
+  resource: "@PerkamoSymfonyBundle/config/routes.php"
+  type: php
+```
+
+The bundle ships route definitions as PHP config so `symfony/yaml` is not a
+runtime dependency of this package. Importing the PHP route file from your
+application YAML route config is supported by Symfony; `type: php` makes the
+loader explicit.
+
 The token endpoints use the current Symfony security user identifier by
 default. For custom customer IDs, implement
 `Perkamo\SymfonyBundle\Security\UserIdResolverInterface` and configure:
@@ -158,11 +174,11 @@ client without handling token routes manually:
 </script>
 ```
 
-The generated frontend config never includes the server API key or browser key.
-It also does not expose the Space ID to frontend code.
+The generated frontend config never includes the server API key, signing secret
+or Space ID.
 
-The generated client uses preview Perkamo `/v1/client/*` routes after it receives
-a browser token. Until those routes are enabled for an integration, use the
+The generated client uses Perkamo `/v1/client/*` routes after it receives a
+client token. Until those routes are enabled for an integration, use the
 bundle for backend event emission and token issuing, and return customer state
 through your own backend controllers.
 
@@ -171,7 +187,7 @@ this Symfony bundle:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.7.0/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.9.0/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```
@@ -198,13 +214,13 @@ but new integrations should use `perkamo_browser_bundle_script()`.
 
 ## Security Notes
 
-Use this package only from trusted Symfony backend code. The browser token
-routes require an authenticated Symfony user before they ask Perkamo to issue a
-short-lived browser JWT. Never expose the server API key to templates, JSON
+Use this package only from trusted Symfony backend code. The token routes
+require an authenticated Symfony user before they self-sign a short-lived client
+token. Never expose the server API key or signing secret to templates, JSON
 config endpoints, browser bundles, mobile apps or embedded widgets.
 
-Browser tokens are short-lived credentials issued by Perkamo, not locally signed
-by the Symfony application.
+Client tokens are short-lived credentials signed locally by the Symfony
+application with a Perkamo signing key secret.
 
 ## License
 

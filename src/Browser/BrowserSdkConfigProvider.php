@@ -68,7 +68,7 @@ final class BrowserSdkConfigProvider
       getToken: function () {
         return fetch(config.tokenEndpoint, { method: "POST", credentials: "include" })
           .then(function (response) {
-            if (!response.ok) throw new Error("Unable to create Perkamo browser token");
+            if (!response.ok) throw new Error("Unable to create Perkamo client token");
             return response.json();
           })
           .then(function (body) { return body.token; });
@@ -76,7 +76,7 @@ final class BrowserSdkConfigProvider
       getStreamToken: function () {
         return fetch(config.streamTokenEndpoint, { method: "POST", credentials: "include" })
           .then(function (response) {
-            if (!response.ok) throw new Error("Unable to create Perkamo stream token");
+            if (!response.ok) throw new Error("Unable to create Perkamo stream client token");
             return response.json();
           })
           .then(function (body) { return body.token; });

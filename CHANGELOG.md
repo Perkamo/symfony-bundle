@@ -1,5 +1,14 @@
 # `perkamo/symfony-bundle` Changelog
 
+## 0.9.0 - 2026-06-26
+
+### Changed
+
+- Require `perkamo/sdk` 0.8 so token routes self-sign client tokens with a
+  Perkamo signing key secret.
+- Replace `browser.key` configuration with explicit `browser.kid` and
+  `browser.secret`, and keep the default browser bundle on 0.8.0.
+
 ## 0.8.0 - 2026-06-06
 
 ### Changed
@@ -46,7 +55,7 @@
 
 ### Changed
 
-- Remove `perkamo.space` from bundle configuration and browser token payloads; browser tokens are scoped by their configured browser key id.
+- Remove `perkamo.space` from bundle configuration and browser token payloads; browser tokens are scoped by their configured browser `kid`.
 - Align the default browser bundle version with `@perkamo/browser` 0.4.0.
 
 ## 0.3.1 - 2026-06-03

@@ -10,7 +10,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 final class Configuration implements ConfigurationInterface
 {
-    public const DEFAULT_BROWSER_BUNDLE_VERSION = '0.7.0';
+    public const DEFAULT_BROWSER_BUNDLE_VERSION = '0.9.0';
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -35,7 +35,7 @@ final class Configuration implements ConfigurationInterface
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->booleanNode('enabled')
-                            ->defaultTrue()
+                            ->defaultFalse()
                         ->end()
                         ->arrayNode('bundle')
                             ->addDefaultsIfNotSet()
@@ -57,9 +57,19 @@ final class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
-                        ->scalarNode('key')
-                            ->defaultValue('%env(PERKAMO_BROWSER_KEY)%')
-                            ->cannotBeEmpty()
+                        ->scalarNode('kid')
+                            ->defaultNull()
+                            ->validate()
+                                ->ifTrue(static fn (mixed $value): bool => $value !== null && (!is_string($value) || trim($value) === ''))
+                                ->thenInvalid('Perkamo browser kid must be a non-empty string when configured.')
+                            ->end()
+                        ->end()
+                        ->scalarNode('secret')
+                            ->defaultNull()
+                            ->validate()
+                                ->ifTrue(static fn (mixed $value): bool => $value !== null && (!is_string($value) || trim($value) === ''))
+                                ->thenInvalid('Perkamo browser secret must be a non-empty string when configured.')
+                            ->end()
                         ->end()
                         ->integerNode('token_ttl_seconds')
                             ->min(60)

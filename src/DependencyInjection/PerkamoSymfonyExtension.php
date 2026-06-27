@@ -13,6 +13,7 @@ use Perkamo\SymfonyBundle\Controller\BrowserTokenController;
 use Perkamo\SymfonyBundle\Security\SecurityTokenUserIdResolver;
 use Perkamo\SymfonyBundle\Security\UserIdResolverInterface;
 use Perkamo\SymfonyBundle\Twig\PerkamoTwigExtension;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -42,7 +43,8 @@ final class PerkamoSymfonyExtension extends Extension
          *             version: string,
          *             path: string|null
          *         },
-         *         key: string,
+         *         kid: string|null,
+         *         secret: string|null,
          *         token_ttl_seconds: int,
          *         stream_token_ttl_seconds: int,
          *         user_id_resolver: string
@@ -65,6 +67,14 @@ final class PerkamoSymfonyExtension extends Extension
         }
 
         $browser = $config['browser'];
+        $kid = $browser['kid'] ?? null;
+        $secret = $browser['secret'] ?? null;
+        if (!is_string($kid) || trim($kid) === '') {
+            throw new InvalidConfigurationException('perkamo.browser.kid is required when perkamo.browser.enabled is true.');
+        }
+        if (!is_string($secret) || trim($secret) === '') {
+            throw new InvalidConfigurationException('perkamo.browser.secret is required when perkamo.browser.enabled is true.');
+        }
         $bundle = $browser['bundle'];
         $browserBundlePath = $bundle['path'] ?? sprintf(
             'https://cdn.jsdelivr.net/npm/@perkamo/browser@%s/dist/perkamo-browser.global.min.js',
@@ -82,8 +92,10 @@ final class PerkamoSymfonyExtension extends Extension
         $container
             ->register(ApiBrowserTokenIssuer::class, ApiBrowserTokenIssuer::class)
             ->setArguments([
-                new Reference(Client::class),
-                $browser['key'],
+                trim($kid),
+                trim($secret),
+                ['customer:read', 'events:write'],
+                ['*'],
                 $browser['token_ttl_seconds'],
                 $browser['stream_token_ttl_seconds'],
             ]);

@@ -43,7 +43,7 @@ final class BrowserTokenController
         if ($userId === null || trim($userId) === '') {
             throw new UnauthorizedHttpException(
                 'Bearer',
-                'Perkamo browser token endpoints require an authenticated user.',
+                'Perkamo client token endpoints require an authenticated user.',
             );
         }
 

@@ -13,6 +13,7 @@ use Perkamo\SymfonyBundle\DependencyInjection\PerkamoSymfonyExtension;
 use Perkamo\SymfonyBundle\Security\SecurityTokenUserIdResolver;
 use Perkamo\SymfonyBundle\Security\UserIdResolverInterface;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class PerkamoSymfonyExtensionTest extends TestCase
@@ -33,9 +34,10 @@ final class PerkamoSymfonyExtensionTest extends TestCase
         self::assertSame(Client::class, (string) $container->getAlias('perkamo.client'));
 
         $issuerDefinition = $container->getDefinition(ApiBrowserTokenIssuer::class);
-        self::assertSame('pk_test_123', $issuerDefinition->getArgument(1));
-        self::assertSame(600, $issuerDefinition->getArgument(2));
-        self::assertSame(120, $issuerDefinition->getArgument(3));
+        self::assertSame('csk_test_123', $issuerDefinition->getArgument(0));
+        self::assertSame('signing-secret', $issuerDefinition->getArgument(1));
+        self::assertSame(600, $issuerDefinition->getArgument(4));
+        self::assertSame(120, $issuerDefinition->getArgument(5));
         self::assertSame(
             ApiBrowserTokenIssuer::class,
             (string) $container->getAlias(BrowserTokenIssuerInterface::class),
@@ -43,9 +45,9 @@ final class PerkamoSymfonyExtensionTest extends TestCase
 
         self::assertTrue($container->hasDefinition(BrowserSdkConfigProvider::class));
         $configDefinition = $container->getDefinition(BrowserSdkConfigProvider::class);
-        self::assertSame('0.7.0', $configDefinition->getArgument(2));
+        self::assertSame('0.9.0', $configDefinition->getArgument(2));
         self::assertSame(
-            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.7.0/dist/perkamo-browser.global.min.js',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.9.0/dist/perkamo-browser.global.min.js',
             $configDefinition->getArgument(3),
         );
         self::assertSame(
@@ -67,6 +69,32 @@ final class PerkamoSymfonyExtensionTest extends TestCase
 
         self::assertTrue($container->hasDefinition(Client::class));
         self::assertFalse($container->hasDefinition(ApiBrowserTokenIssuer::class));
+    }
+
+    public function testBrowserIntegrationDefaultsDisabled(): void
+    {
+        $container = new ContainerBuilder();
+
+        (new PerkamoSymfonyExtension())->load([[
+            'base_url' => 'https://api.example.test',
+            'api_key' => 'sk_test_secret',
+            'timeout_seconds' => 5,
+        ]], $container);
+
+        self::assertTrue($container->hasDefinition(Client::class));
+        self::assertFalse($container->hasDefinition(ApiBrowserTokenIssuer::class));
+    }
+
+    public function testEnabledBrowserIntegrationRequiresSigningKeyConfig(): void
+    {
+        $container = new ContainerBuilder();
+        $config = $this->config();
+        unset($config['browser']['kid']);
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('perkamo.browser.kid is required');
+
+        (new PerkamoSymfonyExtension())->load([$config], $container);
     }
 
     public function testBrowserIntegrationDoesNotRequireSpace(): void
@@ -101,10 +129,12 @@ final class PerkamoSymfonyExtensionTest extends TestCase
             'api_key' => 'sk_test_secret',
             'timeout_seconds' => 5,
             'browser' => [
+                'enabled' => true,
                 'bundle' => [
-                    'version' => '0.7.0',
+                    'version' => '0.9.0',
                 ],
-                'key' => 'pk_test_123',
+                'kid' => 'csk_test_123',
+                'secret' => 'signing-secret',
                 'token_ttl_seconds' => 600,
                 'stream_token_ttl_seconds' => 120,
             ],
