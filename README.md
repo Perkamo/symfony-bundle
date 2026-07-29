@@ -187,7 +187,7 @@ this Symfony bundle:
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.9.0/dist/perkamo-browser.global.min.js"
+  src="https://cdn.jsdelivr.net/npm/@perkamo/browser@0.11.0/dist/perkamo-browser.global.min.js"
   defer
 ></script>
 ```

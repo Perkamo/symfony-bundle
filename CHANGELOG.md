@@ -9,6 +9,13 @@
 - Replace `browser.key` configuration with explicit `browser.kid` and
   `browser.secret`, and keep the default browser bundle on 0.8.0.
 
+## 0.9.1 - 2026-07-29
+
+### Fixed
+
+- Allow the current `perkamo/sdk` 0.9 release so Symfony integrations can use
+  signed, replay-safe customer erasure without a Composer constraint conflict.
+
 ## 0.8.0 - 2026-06-06
 
 ### Changed
