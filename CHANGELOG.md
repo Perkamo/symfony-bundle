@@ -1,5 +1,13 @@
 # `perkamo/symfony-bundle` Changelog
 
+## Unreleased
+
+### Breaking
+
+- Align the bundled browser and PHP clients with their canonical response
+  models. Application code must read `goals`, `awards`, `perks` and `unlock`
+  instead of the deprecated v1 REST aliases.
+
 ## 0.9.0 - 2026-06-26
 
 ### Changed
@@ -95,3 +103,9 @@
 - Added backend service wiring for `perkamo/sdk`.
 - Added browser token, stream token and browser SDK config endpoints.
 - Added Twig helpers for loading the browser SDK from the approved CDN build.
+
+## 1.0.0 - 2026-08-06
+
+### Changed
+
+- SDK release

@@ -45,9 +45,9 @@ final class PerkamoSymfonyExtensionTest extends TestCase
 
         self::assertTrue($container->hasDefinition(BrowserSdkConfigProvider::class));
         $configDefinition = $container->getDefinition(BrowserSdkConfigProvider::class);
-        self::assertSame('0.11.0', $configDefinition->getArgument(2));
+        self::assertSame('1.0.0', $configDefinition->getArgument(2));
         self::assertSame(
-            'https://cdn.jsdelivr.net/npm/@perkamo/browser@0.11.0/dist/perkamo-browser.global.min.js',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@1.0.0/dist/perkamo-browser.global.min.js',
             $configDefinition->getArgument(3),
         );
         self::assertSame(
@@ -131,7 +131,7 @@ final class PerkamoSymfonyExtensionTest extends TestCase
             'browser' => [
                 'enabled' => true,
                 'bundle' => [
-                    'version' => '0.11.0',
+                    'version' => '1.0.0',
                 ],
                 'kid' => 'csk_test_123',
                 'secret' => 'signing-secret',
