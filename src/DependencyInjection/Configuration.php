@@ -10,7 +10,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 final class Configuration implements ConfigurationInterface
 {
-    public const DEFAULT_BROWSER_BUNDLE_VERSION = '1.0.0';
+    public const DEFAULT_BROWSER_BUNDLE_VERSION = '1.1.0';
 
     public function getConfigTreeBuilder(): TreeBuilder
     {

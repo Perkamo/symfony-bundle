@@ -31,6 +31,10 @@ final class PerkamoSymfonyExtensionTest extends TestCase
         self::assertSame('https://api.example.test', $clientDefinition->getArgument(0));
         self::assertSame('sk_test_secret', $clientDefinition->getArgument(1));
         self::assertSame(5, $clientDefinition->getArgument(2));
+        self::assertMatchesRegularExpression(
+            '/^perkamo\/symfony-bundle@\d+\.\d+\.\d+/',
+            $clientDefinition->getArgument(3),
+        );
         self::assertSame(Client::class, (string) $container->getAlias('perkamo.client'));
 
         $issuerDefinition = $container->getDefinition(ApiBrowserTokenIssuer::class);
@@ -45,9 +49,9 @@ final class PerkamoSymfonyExtensionTest extends TestCase
 
         self::assertTrue($container->hasDefinition(BrowserSdkConfigProvider::class));
         $configDefinition = $container->getDefinition(BrowserSdkConfigProvider::class);
-        self::assertSame('1.0.0', $configDefinition->getArgument(2));
+        self::assertSame('1.1.0', $configDefinition->getArgument(2));
         self::assertSame(
-            'https://cdn.jsdelivr.net/npm/@perkamo/browser@1.0.0/dist/perkamo-browser.global.min.js',
+            'https://cdn.jsdelivr.net/npm/@perkamo/browser@1.1.0/dist/perkamo-browser.global.min.js',
             $configDefinition->getArgument(3),
         );
         self::assertSame(
@@ -131,7 +135,7 @@ final class PerkamoSymfonyExtensionTest extends TestCase
             'browser' => [
                 'enabled' => true,
                 'bundle' => [
-                    'version' => '1.0.0',
+                    'version' => '1.1.0',
                 ],
                 'kid' => 'csk_test_123',
                 'secret' => 'signing-secret',

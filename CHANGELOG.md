@@ -8,6 +8,11 @@
   models. Application code must read `goals`, `awards`, `perks` and `unlock`
   instead of the deprecated v1 REST aliases.
 
+### Added
+
+- Identify Symfony as the top-level integration on Perkamo API requests so
+  version usage can support future upgrade guidance.
+
 ## 0.9.0 - 2026-06-26
 
 ### Changed
@@ -105,6 +110,12 @@
 - Added Twig helpers for loading the browser SDK from the approved CDN build.
 
 ## 1.0.0 - 2026-08-06
+
+### Changed
+
+- SDK release
+
+## 1.1.0 - 2026-08-08
 
 ### Changed
 

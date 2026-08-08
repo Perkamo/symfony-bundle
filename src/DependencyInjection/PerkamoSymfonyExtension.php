@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Perkamo\SymfonyBundle\DependencyInjection;
 
 use Perkamo\Client;
+use Perkamo\SdkIdentification;
 use Perkamo\SymfonyBundle\Browser\ApiBrowserTokenIssuer;
 use Perkamo\SymfonyBundle\Browser\BrowserSdkConfigProvider;
 use Perkamo\SymfonyBundle\Browser\BrowserTokenIssuerInterface;
@@ -59,6 +60,7 @@ final class PerkamoSymfonyExtension extends Extension
                 $config['base_url'],
                 $config['api_key'],
                 $config['timeout_seconds'],
+                SdkIdentification::forPackage('perkamo/symfony-bundle', '1.0.0'),
             ]);
         $container->setAlias('perkamo.client', Client::class);
 
