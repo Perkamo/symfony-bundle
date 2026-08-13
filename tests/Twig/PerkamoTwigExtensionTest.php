@@ -43,7 +43,7 @@ final class PerkamoTwigExtensionTest extends TestCase
         return new BrowserSdkConfigProvider(
             $router,
             'https://api.perkamo.com',
-            '1.1.0',
+            '1.2.0',
             'https://cdn.example.test/perkamo-browser.js',
         );
     }

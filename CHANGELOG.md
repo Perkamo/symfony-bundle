@@ -120,3 +120,9 @@
 ### Changed
 
 - SDK release
+
+## 1.2.0 - 2026-08-13
+
+### Changed
+
+- Stable MCP 2026-07-28 support, additive erasure reporting, and corrected SDK runtime identification
