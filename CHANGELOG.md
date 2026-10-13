@@ -126,3 +126,9 @@
 ### Changed
 
 - Stable MCP 2026-07-28 support, additive erasure reporting, and corrected SDK runtime identification
+
+## 1.2.1 - 2026-10-13
+
+### Changed
+
+- Refresh dependencies and verify supported SDK integrations

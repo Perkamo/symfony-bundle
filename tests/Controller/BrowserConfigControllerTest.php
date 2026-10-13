@@ -13,7 +13,7 @@ final class BrowserConfigControllerTest extends TestCase
 {
     public function testReturnsBrowserConfigAsJson(): void
     {
-        $router = $this->createMock(UrlGeneratorInterface::class);
+        $router = $this->createStub(UrlGeneratorInterface::class);
         $router
             ->method('generate')
             ->willReturnCallback(static fn (string $name): string => match ($name) {
@@ -25,7 +25,7 @@ final class BrowserConfigControllerTest extends TestCase
         $controller = new BrowserConfigController(new BrowserSdkConfigProvider(
             $router,
             'https://api.perkamo.com',
-            '1.2.0',
+            '1.2.1',
             'https://cdn.example.test/perkamo-browser.js',
         ));
 
@@ -35,7 +35,7 @@ final class BrowserConfigControllerTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertArrayNotHasKey('space', $body);
         self::assertArrayNotHasKey('baseUrl', $body);
-        self::assertSame('1.2.0', $body['browserBundleVersion']);
+        self::assertSame('1.2.1', $body['browserBundleVersion']);
         self::assertSame('https://cdn.example.test/perkamo-browser.js', $body['browserBundlePath']);
         self::assertSame('/api/perkamo/token', $body['tokenEndpoint']);
         self::assertArrayNotHasKey('apiKey', $body);

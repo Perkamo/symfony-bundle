@@ -31,7 +31,7 @@ final class PerkamoTwigExtensionTest extends TestCase
 
     private function provider(): BrowserSdkConfigProvider
     {
-        $router = $this->createMock(UrlGeneratorInterface::class);
+        $router = $this->createStub(UrlGeneratorInterface::class);
         $router
             ->method('generate')
             ->willReturnCallback(static fn (string $name): string => match ($name) {
@@ -43,7 +43,7 @@ final class PerkamoTwigExtensionTest extends TestCase
         return new BrowserSdkConfigProvider(
             $router,
             'https://api.perkamo.com',
-            '1.2.0',
+            '1.2.1',
             'https://cdn.example.test/perkamo-browser.js',
         );
     }
